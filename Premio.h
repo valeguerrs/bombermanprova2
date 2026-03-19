@@ -39,3 +39,7 @@ public:
 // mancano: togliere l'item una volta raccolto; dire di aumentare il raggio di 1 in tutte e 4 le direzioni
 // (manca funzione dell'effetto del premio vero e proprio)
 #endif //PROVA_PROGETTO_PREMIO_H
+// tutti gli items presi aumentano il punteggio di 50 punti, tutti i nemici distrutti
+// uguale.
+//item che: 1. da maggiore raggio di scoppio alla bomba per 10 sec; 2. da immunità dai nemici per 10 secondi;
+//3. rallenta la velocità dei nemici per 10 secondi.

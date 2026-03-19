@@ -37,7 +37,6 @@ bool Premio::isRaccolto() {
 bool Premio::isEffettoFinito() {
     if (raccolto) {
         time_t orarioAttuale = time(NULL);
-
         if (orarioAttuale-momentoRaccolta >= 10) {
             return true;
         }
