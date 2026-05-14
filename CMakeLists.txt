@@ -7,19 +7,17 @@ set(CMAKE_PREFIX_PATH "/opt/homebrew/opt/ncurses")
 find_package(Curses REQUIRED)
 include_directories(${CURSES_INCLUDE_DIR})
 add_executable(prova_progetto main.cpp
-        Menu.cpp
-        Menu.h
         GameStatus.cpp
         Gamestatus.h
         Tempo.cpp
         Tempo.h
-        cmake-build-debug/Menu.cpp
-        cmake-build-debug/Menu.h
-        cmake-build-debug/GameStatus.cpp
-        cmake-build-debug/GameStatus.h
+        GameStatus.cpp
+        GameStatus.h
         Bomba.cpp
         Bomba.h
         Premio.cpp
-        Premio.h)
+        Premio.h
+        griglia.cpp)
+target_link_libraries(prova_progetto ncurses)
 target_link_libraries(prova_progetto ${CURSES_LIBRARIES})
 

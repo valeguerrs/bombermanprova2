@@ -1,20 +1,5 @@
 /Users/aliceflamigni/Desktop/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/Users/aliceflamigni/Desktop/CLion.app/Contents/bin/ninja/mac/aarch64/ninja -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -G Ninja -S /Users/aliceflamigni/CLionProjects/prova_progetto -B /Users/aliceflamigni/CLionProjects/prova_progetto/cmake-build-debug
 sh: vm_stat: command not found
--- The C compiler identification is AppleClang 17.0.0.17000319
--- The CXX compiler identification is AppleClang 17.0.0.17000319
--- Detecting C compiler ABI info
-sh: vm_stat: command not found
--- Detecting C compiler ABI info - done
--- Check for working C compiler: /usr/bin/clang - skipped
--- Detecting C compile features
--- Detecting C compile features - done
--- Detecting CXX compiler ABI info
-sh: vm_stat: command not found
--- Detecting CXX compiler ABI info - done
--- Check for working CXX compiler: /usr/bin/clang++ - skipped
--- Detecting CXX compile features
--- Detecting CXX compile features - done
--- Found Curses: /opt/homebrew/opt/ncurses/lib/libcurses.dylib
--- Configuring done (1.3s)
+-- Configuring done (0.0s)
 -- Generating done (0.0s)
 -- Build files have been written to: /Users/aliceflamigni/CLionProjects/prova_progetto/cmake-build-debug

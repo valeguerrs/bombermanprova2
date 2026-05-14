@@ -4,6 +4,10 @@
  .AppleDouble
  .LSOverride
 
+cmake-build-debug/
+main
+prova_progetto
+
  # File oggetto e compilati C++
  *.o
  *.out

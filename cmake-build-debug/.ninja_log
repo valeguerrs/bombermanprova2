@@ -1,17 +1,9 @@
-# ninja log v6
-194	317	1772983906474636794	prova_progetto	36401cccc6ef8441
-2	58	1773134127290909153	/Users/aliceflamigni/CLionProjects/prova_progetto/cmake-build-debug/cmake_install.cmake	ecccc3725a9d21e9
-3	215	1772983806778651570	CMakeFiles/prova_progetto.dir/main.cpp.o	7dd456d38cdb189
-2	58	1773134127291765458	build.ninja	ecccc3725a9d21e9
-4	209	1772983806780084650	CMakeFiles/prova_progetto.dir/Tempo.cpp.o	ac3e4eca8719b3c9
-1	194	1772983906282268633	CMakeFiles/prova_progetto.dir/Menu.cpp.o	c9499984a13b2c9c
-4	215	1772983806780550636	CMakeFiles/prova_progetto.dir/Bomba.cpp.o	c0eb399256b54380
-5	215	1772983806780806295	CMakeFiles/prova_progetto.dir/Premio.cpp.o	9b962432052f52ab
-4	215	1772983806779943613	CMakeFiles/prova_progetto.dir/GameStatus.cpp.o	68fdb4ffba20f8f4
-9	262	1773140331033962226	CMakeFiles/prova_progetto.dir/Tempo.cpp.o	ac3e4eca8719b3c9
-9	270	1773140331033825897	CMakeFiles/prova_progetto.dir/GameStatus.cpp.o	68fdb4ffba20f8f4
-10	270	1773140331034088473	CMakeFiles/prova_progetto.dir/Bomba.cpp.o	c0eb399256b54380
-8	271	1773140331032758429	CMakeFiles/prova_progetto.dir/main.cpp.o	7dd456d38cdb189
-10	272	1773140331034720246	CMakeFiles/prova_progetto.dir/Premio.cpp.o	9b962432052f52ab
-9	278	1773140331033642861	CMakeFiles/prova_progetto.dir/Menu.cpp.o	c9499984a13b2c9c
-278	451	1773140331302746757	prova_progetto	36401cccc6ef8441
+# ninja log v7
+14	897	1778407365549961237	CMakeFiles/prova_progetto.dir/Premio.cpp.o	e8a3db5912ea167c
+14	246	1778407365549508883	CMakeFiles/prova_progetto.dir/GameStatus.cpp.o	592bb4e58c86237e
+13	865	1777190538295565774	CMakeFiles/prova_progetto.dir/Bomba.cpp.o	b7365ca37bb81c04
+2	64	1776073701054382243	CMakeFiles/prova_progetto.dir/Menu.cpp.o	41a17dea1bc57c47
+14	896	1778407365549680292	CMakeFiles/prova_progetto.dir/Tempo.cpp.o	f057b1d9f772922a
+20	867	1777554940052833515	CMakeFiles/prova_progetto.dir/main.cpp.o	32616561a15bd43b
+867	1038	1777554940899920707	prova_progetto	7e1ac94cb48eef5f
+14	210	1778407365550142103	CMakeFiles/prova_progetto.dir/griglia.cpp.o	1ff3faac210d1783
