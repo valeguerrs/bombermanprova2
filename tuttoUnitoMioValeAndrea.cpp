@@ -1,6 +1,3 @@
-//
-// Created by alice flamigni on 31/05/26.
-//
 #include <iostream>
 #include <curses.h>
 #include <cstdlib>
@@ -247,7 +244,6 @@ public:
             griglia[righe - 1][j] = muro;
         }
 
-        // Pattern geometrico blocchi fissi
         for (int i = 1; i < righe - 1; i += 2) {
             for (int j = 4; j < colonne - 1; j += 5) {
                 griglia[i][j] = muro;
@@ -263,7 +259,6 @@ public:
             int y = rand() % righe;
             int x = rand() % colonne;
 
-            // Safe Spawn Zone
             if ((y == 1 && x == 1) || (y == 1 && x == 2) || (y == 2 && x == 1)) continue;
 
             if (griglia[y][x] == vuoto) {
@@ -307,7 +302,7 @@ public:
                 char carattereDaDisegnare = griglia[i][j];
                 if (carattereDaDisegnare == muro || carattereDaDisegnare == muro_distruttibile) {
                     wattron(win, A_REVERSE);
-                    mvwaddch(win, i, j, carattereDaDisegnare == muro ? ' ' : '#');
+                    mvwaddch(win, i, j, carattereDaDisegnare == muro ? '#' : ' ');
                     wattroff(win, A_REVERSE);
                 } else {
                     mvwaddch(win, i, j, carattereDaDisegnare);
@@ -319,13 +314,6 @@ public:
             mvwprintw(win, portaleY, portaleX, "P");
         }
     }
-};
-
-struct gestore_livelli {
-    livello lv_attuale;
-    gestore_livelli *precedente;
-    gestore_livelli *successivo;
-    gestore_livelli() { precedente = NULL; successivo = NULL; }
 };
 
 //-----------------------
@@ -591,6 +579,68 @@ Premio::Premio(int startX, int startY, int tipoPremio) {
     momentoRaccolta = std::chrono::steady_clock::time_point();
 }
 
+// MODIFICA SALVATAGGIO STATO LIVELLO: Spostato gestore_livelli in fondo per incapsulare i nemici e premi generati
+struct gestore_livelli {
+    livello lv_attuale;
+    gestore_livelli *precedente;
+    gestore_livelli *successivo;
+
+    Premio* premi_livello[800];
+    int num_premi;
+
+    enemy* e1;
+    chaser* c1;
+    shooter* s1;
+
+    gestore_livelli() {
+        precedente = NULL;
+        successivo = NULL;
+        num_premi = 0;
+        for (int i = 0; i < 800; i++) premi_livello[i] = NULL;
+        e1 = NULL;
+        c1 = NULL;
+        s1 = NULL;
+    }
+
+    ~gestore_livelli() {
+        for (int i = 0; i < num_premi; i++) {
+            if (premi_livello[i] != NULL) {
+                delete premi_livello[i];
+                premi_livello[i] = NULL;
+            }
+        }
+        if (e1 != NULL) delete e1;
+        if (c1 != NULL) delete c1;
+        if (s1 != NULL) delete s1;
+    }
+
+    // Viene chiamato solo la prima volta che si visita un livello nuovo
+    void inizializzaEntita(char mappa[righe][colonne]) {
+        if (e1 != NULL) return; // Evita di sovrascrivere se le entità esistono già
+
+        num_premi = 0;
+        for (int i = 0; i < righe; i++) {
+            for (int j = 0; j < colonne; j++) {
+                // Generazione dei premi sotto i muri distruttibili
+                if (mappa[i][j] == muro_distruttibile) {
+                    if (rand() % 100 < 30) {
+                        premi_livello[num_premi] = new Premio(j, i, rand() % 4);
+                        num_premi++;
+                    }
+                }
+            }
+        }
+
+        int ex, ey, cx, cy, sx, sy;
+        do { ex = rand() % (colonne - 2) + 1; ey = rand() % (righe - 2) + 1; } while ((ex < 5 && ey < 5) || mappa[ey][ex] != vuoto);
+        e1 = new enemy(ex, ey);
+        do { cx = rand() % (colonne - 2) + 1; cy = rand() % (righe - 2) + 1; } while ((cx < 5 && cy < 5) || mappa[cy][cx] != vuoto);
+        c1 = new chaser(cx, cy);
+        do { sx = rand() % (colonne - 2) + 1; sy = rand() % (righe - 2) + 1; } while ((sx < 5 && sy < 5) || mappa[sy][sx] != vuoto);
+        s1 = new shooter(sx, sy);
+    }
+};
+
 //-----------------------
 // MAIN
 // ----------------------
@@ -619,30 +669,10 @@ int main() {
     lv->lv_attuale = livello(100);
     char(*mappa)[colonne] = lv->lv_attuale.getGriglia();
 
-    Premio* premi_livello[800];
-    for (int i = 0; i < 800; i++) premi_livello[i] = NULL;
-    int num_premi = 0;
-
-    for (int i = 0; i < righe; i++) {
-        for (int j = 0; j < colonne; j++) {
-            if (mappa[i][j] == muro_distruttibile) {
-                if (rand() % 100 < 30) {
-                    premi_livello[num_premi] = new Premio(j, i, rand() % 4);
-                    num_premi++;
-                }
-            }
-        }
-    }
+    // MODIFICA SALVATAGGIO STATO LIVELLO: Chiamata alla nuova funzione che genera i nemici DENTRO al livello 1
+    lv->inizializzaEntita(mappa);
 
     player player1(1, 1);
-
-    int ex, ey, cx, cy, sx, sy;
-    do { ex = rand() % (colonne - 2) + 1; ey = rand() % (righe - 2) + 1; } while ((ex < 5 && ey < 5) || mappa[ey][ex] != vuoto);
-    enemy enemy1(ex, ey);
-    do { cx = rand() % (colonne - 2) + 1; cy = rand() % (righe - 2) + 1; } while ((cx < 5 && cy < 5) || mappa[cy][cx] != vuoto);
-    chaser chaser1(cx, cy);
-    do { sx = rand() % (colonne - 2) + 1; sy = rand() % (righe - 2) + 1; } while ((sx < 5 && sy < 5) || mappa[sy][sx] != vuoto);
-    shooter shooter1(sx, sy);
 
     const int MAX_PROIETTILI = 10;
     proiettile proiettili[MAX_PROIETTILI];
@@ -657,7 +687,6 @@ int main() {
     for (int i = 0; i < MAX_BOMBE; i++) arrayBombe[i] = NULL;
 
     bool giocoInCorso = true;
-
     int navigaLivello = 0;
 
     auto tempoUltimoRespawn = std::chrono::steady_clock::now();
@@ -682,21 +711,23 @@ int main() {
 
         lv->lv_attuale.disegna(win);
 
-        // 1. GESTIONE PREMI
+        // 1. GESTIONE PREMI DEL LIVELLO ATTUALE
         bool power_raggio = false, power_immunita = false, power_lento = false, power_piubombe = false;
-        for (int i = 0; i < num_premi; i++) {
-            if (premi_livello[i] != NULL) {
-                if (premi_livello[i]->isNascosto() && mappa[premi_livello[i]->getY()][premi_livello[i]->getX()] == vuoto) {
-                    premi_livello[i]->scopri();
+
+        // MODIFICA SALVATAGGIO STATO LIVELLO: Sostituito num_premi e premi_livello globali con i parametri dello specifico livello (lv->...)
+        for (int i = 0; i < lv->num_premi; i++) {
+            if (lv->premi_livello[i] != NULL) {
+                if (lv->premi_livello[i]->isNascosto() && mappa[lv->premi_livello[i]->getY()][lv->premi_livello[i]->getX()] == vuoto) {
+                    lv->premi_livello[i]->scopri();
                 }
-                premi_livello[i]->disegnaPremio(win);
-                if (!premi_livello[i]->isNascosto() && !premi_livello[i]->isRaccolto()) {
-                    if (player1.getX() == premi_livello[i]->getX() && player1.getY() == premi_livello[i]->getY()) {
-                        premi_livello[i]->raccogli();
+                lv->premi_livello[i]->disegnaPremio(win);
+                if (!lv->premi_livello[i]->isNascosto() && !lv->premi_livello[i]->isRaccolto()) {
+                    if (player1.getX() == lv->premi_livello[i]->getX() && player1.getY() == lv->premi_livello[i]->getY()) {
+                        lv->premi_livello[i]->raccogli();
                     }
                 }
-                if (premi_livello[i]->isRaccolto() && !premi_livello[i]->isEffettoFinito()) {
-                    int t = premi_livello[i]->getTipo();
+                if (lv->premi_livello[i]->isRaccolto() && !lv->premi_livello[i]->isEffettoFinito()) {
+                    int t = lv->premi_livello[i]->getTipo();
                     if (t == AUMENTA_RAGGIO) power_raggio = true;
                     else if (t == IMMUNITA) power_immunita = true;
                     else if (t == DIMINUISCI_VELOCITA) power_lento = true;
@@ -705,17 +736,18 @@ int main() {
             }
         }
 
-        // 2. LOGICA NEMICI VICINI A BOMBA (Senza funzioni lambda)
+        // 2. LOGICA NEMICI VICINI A BOMBA
         bool nemico1_vicino = false;
         bool chaser1_vicino = false;
         for (int i = 0; i < MAX_BOMBE; i++) {
             if (arrayBombe[i] != NULL && !arrayBombe[i]->isEsplosa_funzione()) {
-                if (sqrt(pow(enemy1.getX() - arrayBombe[i]->getX(), 2) + pow(enemy1.getY() - arrayBombe[i]->getY(), 2)) < 4.0) nemico1_vicino = true;
-                if (sqrt(pow(chaser1.getX() - arrayBombe[i]->getX(), 2) + pow(chaser1.getY() - arrayBombe[i]->getY(), 2)) < 4.0) chaser1_vicino = true;
+                // MODIFICA SALVATAGGIO STATO LIVELLO: Sostituito enemy1 con lv->e1 ecc. per ogni nemico
+                if (sqrt(pow(lv->e1->getX() - arrayBombe[i]->getX(), 2) + pow(lv->e1->getY() - arrayBombe[i]->getY(), 2)) < 4.0) nemico1_vicino = true;
+                if (sqrt(pow(lv->c1->getX() - arrayBombe[i]->getX(), 2) + pow(lv->c1->getY() - arrayBombe[i]->getY(), 2)) < 4.0) chaser1_vicino = true;
             }
         }
 
-        // 3. GESTIONE BOMBE ED ESPLOSIONI (Senza funzioni lambda)
+        // 3. GESTIONE BOMBE ED ESPLOSIONI SUI NEMICI
         for (int i = 0; i < MAX_BOMBE; i++) {
             if (arrayBombe[i] != NULL) {
                 if (arrayBombe[i]->isEsplosa_funzione()) {
@@ -725,7 +757,6 @@ int main() {
                         int rU = arrayBombe[i]->getRaggioSu(), rD = arrayBombe[i]->getRaggioGiu();
                         int rR = arrayBombe[i]->getRaggioDx(), rL = arrayBombe[i]->getRaggioSx();
 
-                        // Colpito il player?
                         int px = player1.getX(), py = player1.getY();
                         if (((px == bx && py >= by - rU && py <= by + rD) || (py == by && px >= bx - rL && px <= bx + rR))) {
                             if (!power_immunita && !invulnerabileRespawn) {
@@ -737,20 +768,20 @@ int main() {
                             }
                         }
 
-                        // Colpiti i nemici?
-                        int nx = enemy1.getX(), ny = enemy1.getY();
-                        if (enemy1.vivo && ((nx == bx && ny >= by - rU && ny <= by + rD) || (ny == by && nx >= bx - rL && nx <= bx + rR))) {
-                            enemy1.vivo = false; statusPartita->aggiungiPuntiNemico();
+                        // MODIFICA SALVATAGGIO STATO LIVELLO: Aggiornati i controlli d'impatto bomba usando i puntatori dei nemici specifici di 'lv'
+                        int nx = lv->e1->getX(), ny = lv->e1->getY();
+                        if (lv->e1->vivo && ((nx == bx && ny >= by - rU && ny <= by + rD) || (ny == by && nx >= bx - rL && nx <= bx + rR))) {
+                            lv->e1->vivo = false; statusPartita->aggiungiPuntiNemico();
                         }
 
-                        nx = chaser1.getX(); ny = chaser1.getY();
-                        if (chaser1.vivo && ((nx == bx && ny >= by - rU && ny <= by + rD) || (ny == by && nx >= bx - rL && nx <= bx + rR))) {
-                            chaser1.vivo = false; statusPartita->aggiungiPuntiChaser();
+                        nx = lv->c1->getX(); ny = lv->c1->getY();
+                        if (lv->c1->vivo && ((nx == bx && ny >= by - rU && ny <= by + rD) || (ny == by && nx >= bx - rL && nx <= bx + rR))) {
+                            lv->c1->vivo = false; statusPartita->aggiungiPuntiChaser();
                         }
 
-                        nx = shooter1.getX(); ny = shooter1.getY();
-                        if (shooter1.vivo && ((nx == bx && ny >= by - rU && ny <= by + rD) || (ny == by && nx >= bx - rL && nx <= bx + rR))) {
-                            shooter1.vivo = false; statusPartita->aggiungiPuntiShooter();
+                        nx = lv->s1->getX(); ny = lv->s1->getY();
+                        if (lv->s1->vivo && ((nx == bx && ny >= by - rU && ny <= by + rD) || (ny == by && nx >= bx - rL && nx <= bx + rR))) {
+                            lv->s1->vivo = false; statusPartita->aggiungiPuntiShooter();
                         }
                     }
                 }
@@ -758,11 +789,11 @@ int main() {
             }
         }
 
-        // 4. MOVIMENTO NEMICI
+        // 4. MOVIMENTO NEMICI DELLA STANZA ATTUALE
         scia[0] = {player1.getX(), player1.getY()};
-        enemy1.muovirandom(mappa, power_lento || nemico1_vicino);
-        chaser1.aggiorna(mappa, player1.getX(), player1.getY(), scia, power_lento || chaser1_vicino);
-        shooter1.aggiorna(player1.getX(), player1.getY(), mappa, proiettili, MAX_PROIETTILI);
+        lv->e1->muovirandom(mappa, power_lento || nemico1_vicino);
+        lv->c1->aggiorna(mappa, player1.getX(), player1.getY(), scia, power_lento || chaser1_vicino);
+        lv->s1->aggiorna(player1.getX(), player1.getY(), mappa, proiettili, MAX_PROIETTILI);
 
         // 5. PROIETTILI
         static auto lastBulletUpdate = std::chrono::steady_clock::now();
@@ -796,9 +827,10 @@ int main() {
         // 6. COLLISIONI FISICHE
         if (!power_immunita && !invulnerabileRespawn) {
             bool presoFisicamente = false;
-            if (enemy1.vivo && player1.getX() == enemy1.getX() && player1.getY() == enemy1.getY()) presoFisicamente = true;
-            if (chaser1.vivo && player1.getX() == chaser1.getX() && player1.getY() == chaser1.getY()) presoFisicamente = true;
-            if (shooter1.vivo && player1.getX() == shooter1.getX() && player1.getY() == shooter1.getY()) presoFisicamente = true;
+            // MODIFICA SALVATAGGIO STATO LIVELLO: Collisioni basate sui puntatori del livello
+            if (lv->e1->vivo && player1.getX() == lv->e1->getX() && player1.getY() == lv->e1->getY()) presoFisicamente = true;
+            if (lv->c1->vivo && player1.getX() == lv->c1->getX() && player1.getY() == lv->c1->getY()) presoFisicamente = true;
+            if (lv->s1->vivo && player1.getX() == lv->s1->getX() && player1.getY() == lv->s1->getY()) presoFisicamente = true;
 
             if (presoFisicamente) {
                 statusPartita->perdiVita();
@@ -809,12 +841,13 @@ int main() {
             }
         }
 
-        // 7. VERIFICA CAMBIO LIVELLO
+        // 7. VERIFICA CAMBIO LIVELLO E NAVIGAZIONE MANUALE
         bool eseguiCambioInAvanti = false;
         bool eseguiCambioIndietro = false;
         bool assegnaPunti = false;
 
-        bool tuttiNemiciMorti = !enemy1.vivo && !chaser1.vivo && !shooter1.vivo;
+        // Condizione apertura portale
+        bool tuttiNemiciMorti = !lv->e1->vivo && !lv->c1->vivo && !lv->s1->vivo;
         int portX = lv->lv_attuale.getPortaleX();
         int portY = lv->lv_attuale.getPortaleY();
 
@@ -825,6 +858,7 @@ int main() {
             }
         }
 
+        // Comandi manuali per spostarsi tra stanze generate e salvate
         if (navigaLivello == 1) {
             eseguiCambioInAvanti = true;
             assegnaPunti = false;
@@ -835,36 +869,19 @@ int main() {
             navigaLivello = 0;
         }
 
-        // MODIFICA BUG PREMI: Aggiunta la pulizia e rigenerazione dei premi anche quando si torna indietro!
+        // MOVIMENTO INDIETRO
         if (eseguiCambioIndietro) {
             if (lv->precedente != NULL) {
                 numeroLivello--;
-                lv = lv->precedente;
+                lv = lv->precedente; // Ci si sposta al livello precedente, che HA GIA' I SUOI NEMICI E PREMI SALVATI!
                 mappa = lv->lv_attuale.getGriglia();
 
                 player1.setPos(1, 1);
                 for (int i = 0; i < MAX_BOMBE; i++) { if (arrayBombe[i]) { delete arrayBombe[i]; arrayBombe[i] = NULL; } }
                 for (int i = 0; i < MAX_PROIETTILI; i++) proiettili[i].attivo = false;
 
-                for (int i = 0; i < num_premi; i++) { if (premi_livello[i]) { delete premi_livello[i]; premi_livello[i] = NULL; } }
-                num_premi = 0;
-                for (int i = 0; i < righe; i++) {
-                    for (int j = 0; j < colonne; j++) {
-                        if (mappa[i][j] == muro_distruttibile) {
-                            if (rand() % 100 < 30) {
-                                premi_livello[num_premi] = new Premio(j, i, rand() % 4);
-                                num_premi++;
-                            }
-                        }
-                    }
-                }
-
-                do { ex = rand() % (colonne - 2) + 1; ey = rand() % (righe - 2) + 1; } while ((ex < 5 && ey < 5) || mappa[ey][ex] != vuoto);
-                enemy1.setPos(ex, ey); enemy1.vivo = true;
-                do { cx = rand() % (colonne - 2) + 1; cy = rand() % (righe - 2) + 1; } while ((cx < 5 && cy < 5) || mappa[cy][cx] != vuoto);
-                chaser1.setPos(cx, cy); chaser1.vivo = true;
-                do { sx = rand() % (colonne - 2) + 1; sy = rand() % (righe - 2) + 1; } while ((sx < 5 && sy < 5) || mappa[sy][sx] != vuoto);
-                shooter1.setPos(sx, sy); shooter1.vivo = true;
+                // MODIFICA SALVATAGGIO STATO LIVELLO: Completamente RIMOSSA la ri-generazione di nemici e premi.
+                // Il livello precedente viene lasciato "congelato" esattamente come lo avevamo abbandonato!
 
                 invulnerabileRespawn = true;
                 tempoUltimoRespawn = std::chrono::steady_clock::now();
@@ -872,6 +889,7 @@ int main() {
             }
         }
 
+        // MOVIMENTO IN AVANTI
         if (eseguiCambioInAvanti) {
             if (assegnaPunti) {
                 statusPartita->aggiungiPuntiLivello(numeroLivello);
@@ -885,6 +903,9 @@ int main() {
                     nuovoNodo->lv_attuale = livello(100 - (numeroLivello * 10));
                     nuovoNodo->precedente = lv;
                     lv->successivo = nuovoNodo;
+
+                    // MODIFICA SALVATAGGIO STATO LIVELLO: Se il livello non esiste, delega l'inizializzazione alla sua funzione nativa
+                    lv->successivo->inizializzaEntita(nuovoNodo->lv_attuale.getGriglia());
                 }
                 lv = lv->successivo;
                 mappa = lv->lv_attuale.getGriglia();
@@ -893,25 +914,7 @@ int main() {
                 for (int i = 0; i < MAX_BOMBE; i++) { if (arrayBombe[i]) { delete arrayBombe[i]; arrayBombe[i] = NULL; } }
                 for (int i = 0; i < MAX_PROIETTILI; i++) proiettili[i].attivo = false;
 
-                for (int i = 0; i < num_premi; i++) { if (premi_livello[i]) { delete premi_livello[i]; premi_livello[i] = NULL; } }
-                num_premi = 0;
-                for (int i = 0; i < righe; i++) {
-                    for (int j = 0; j < colonne; j++) {
-                        if (mappa[i][j] == muro_distruttibile) {
-                            if (rand() % 100 < 30) {
-                                premi_livello[num_premi] = new Premio(j, i, rand() % 4);
-                                num_premi++;
-                            }
-                        }
-                    }
-                }
-
-                do { ex = rand() % (colonne - 2) + 1; ey = rand() % (righe - 2) + 1; } while ((ex < 5 && ey < 5) || mappa[ey][ex] != vuoto);
-                enemy1.setPos(ex, ey); enemy1.vivo = true;
-                do { cx = rand() % (colonne - 2) + 1; cy = rand() % (righe - 2) + 1; } while ((cx < 5 && cy < 5) || mappa[cy][cx] != vuoto);
-                chaser1.setPos(cx, cy); chaser1.vivo = true;
-                do { sx = rand() % (colonne - 2) + 1; sy = rand() % (righe - 2) + 1; } while ((sx < 5 && sy < 5) || mappa[sy][sx] != vuoto);
-                shooter1.setPos(sx, sy); shooter1.vivo = true;
+                // MODIFICA SALVATAGGIO STATO LIVELLO: Anche qua rimossa la generazione di nemici nel main, tutto viene delegato alla struct!
 
                 invulnerabileRespawn = true;
                 tempoUltimoRespawn = std::chrono::steady_clock::now();
@@ -938,9 +941,10 @@ int main() {
             player1.disegna(win);
         }
 
-        enemy1.disegnanemico(win);
-        chaser1.disegnanemico(win);
-        shooter1.disegnanemico(win);
+        // MODIFICA SALVATAGGIO STATO LIVELLO: Disegno i nemici legati al livello
+        lv->e1->disegnanemico(win);
+        lv->c1->disegnanemico(win);
+        lv->s1->disegnanemico(win);
 
         statusPartita->disegnaStatus(win, righe, 18);
         timerPartita->disegna(win, righe, 2);
@@ -963,11 +967,12 @@ int main() {
     } // FINE WHILE
 
     if (statusPartita && timerPartita) statusPartita->convertiTempoInPunti(timerPartita->getTempo());
-    for (int i = 0; i < num_premi; i++) if (premi_livello[i]) delete premi_livello[i];
     for (int i = 0; i < MAX_BOMBE; i++) if (arrayBombe[i]) delete arrayBombe[i];
 
+    // Riporta il puntatore alla testa della lista prima di cancellare
     while (lv->precedente != NULL) lv = lv->precedente;
 
+    // Cancella l'intera lista procedendo in avanti (i distruttori cancelleranno i loro premi e nemici privati)
     while (lv != NULL) {
         gestore_livelli* daCancellare = lv;
         lv = lv->successivo;
