@@ -12,12 +12,13 @@ protected:
     int tempoRimanente; // numero di secondi rimanenti
     std::chrono::steady_clock::time_point ultimoAggiornamento; // memorizza un istante preciso nel tempo (tipo cronometro che va solo in avanti);
                                                                 //si inizializza all'interno del costruttore (file .cpp). permette di calcolare quanto tempo passa tra un controllo e l'altro
-    
-public:
-    Tempo(); // costruttore: quando viene chiamato nel main imposta tempoRimanente a 1000 e inizializza l'ultimoAggiornamento
 
+public:
+    Tempo(int tIniziale); // costruttore: quando viene chiamato nel main imposta tempoRimanente a 1000 e inizializza l'ultimoAggiornamento
+
+    void riprendiTimer(); // serve per scongelare il tempo in modo sicuro quando rientri nel livello
+    void aggiungiTempo(int secondiAggiuntivi); //serve per regalare secondi aggiuntivi al giocatore quando uccide i nemici (25,40,50)
     void aggiorna(); // da chiamare nel ciclo del main (viene chiamato continuamente) per scalare i secondi
-    void fineLivello(); // aggiunge 50 secondi ogni volta che si finisce un livello (arriva a un massimo di 1000)
     int convertiInPunti(); // restituisce i secondi rimasti convertiti in punti (scala 1:1)
 
     int getTempo(); // restituisce i secondi rimanenti
