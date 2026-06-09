@@ -57,7 +57,7 @@ void livello::disegna(WINDOW* win) {
             char carattereDaDisegnare = griglia[i][j];
 
             if (carattereDaDisegnare == muro_distruttibile) {
-                wcolor_set(win, MY_RED, NULL);
+                wcolor_set(win, MY_YELLOW, NULL);
                 // Il cast (unsigned char) impedisce al numero di diventare negativo
                 mvwaddch(win, i, j, ' ');
                 wcolor_set(win, 0, NULL);
