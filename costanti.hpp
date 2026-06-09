@@ -13,6 +13,7 @@ const char vuoto = ' ';
 #define MY_GRAY 3
 #define MY_GREEN 4
 #define MY_BLUE 5
+#define MY_RED_TESTO 6
 
 struct punto { 
     int x, y; 

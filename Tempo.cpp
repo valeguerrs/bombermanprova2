@@ -1,4 +1,5 @@
 #include "Tempo.hpp"
+#include "costanti.hpp"
 
 Tempo::Tempo(int tIniziale) {
     tempoRimanente = tIniziale;
@@ -26,12 +27,12 @@ bool Tempo::isScaduto() { return tempoRimanente <= 0; }
 
 void Tempo::disegna(WINDOW* win, int y, int x) {
     if (tempoRimanente > 100) {
-        wattron(win, COLOR_PAIR(1));
-        mvwprintw(win, y, x, " TIME: %03d ", tempoRimanente);
-        wattroff(win, COLOR_PAIR(1));
-    } else {
         wattron(win, COLOR_PAIR(2));
         mvwprintw(win, y, x, " TIME: %03d ", tempoRimanente);
         wattroff(win, COLOR_PAIR(2));
+    } else {
+        wcolor_set(win, MY_RED_TESTO, NULL);
+        mvwprintw(win, y, x, " TIME: %03d ", tempoRimanente);
+        wcolor_set(win, 0, NULL);
     }
 }

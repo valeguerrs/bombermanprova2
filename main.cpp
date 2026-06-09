@@ -57,6 +57,7 @@ int main() {
     init_pair(MY_GRAY, 7, 7);      // Adatta i numeri a quelli che preferisci
     init_pair(MY_GREEN, 2, 2);
     init_pair(MY_BLUE, 6, 6);
+    init_pair(MY_RED_TESTO, 1,0);
 
     WINDOW* win = newwin(righe + 4, colonne, 0, 0);
 
@@ -64,7 +65,7 @@ int main() {
     int numeroLivello = 1;
     gestore_livelli* lv = new gestore_livelli;
     lv->lv_attuale = livello(100);
-    lv->timerLivello = new Tempo(200);
+    lv->timerLivello = new Tempo(102);
 
     char(*mappa)[colonne] = lv->lv_attuale.getGriglia();
 
