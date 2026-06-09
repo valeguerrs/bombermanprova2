@@ -207,7 +207,7 @@ int main() {
 
         static auto lastBulletUpdate = std::chrono::steady_clock::now();
         auto nowBullet = std::chrono::steady_clock::now();
-        if (std::chrono::duration_cast<std::chrono::milliseconds>(nowBullet - lastBulletUpdate).count() >= 100) {
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(nowBullet - lastBulletUpdate).count() >= 210) {
             for (int i = 0; i < MAX_PROIETTILI; i++) {
                 if (proiettili[i].attivo) {
                     proiettili[i].x += proiettili[i].dx;

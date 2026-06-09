@@ -31,7 +31,7 @@ chaser::chaser(int x, int y) : enemy(x, y) {
 void chaser::aggiorna(char mappa[righe][colonne], int pX, int pY, punto scia[], bool lento) {
     if (!vivo) return;
     auto ora = std::chrono::steady_clock::now();
-    int delay = lento ? 800 : 400;
+    int delay = lento ? 800 : 500;
 
     if (std::chrono::duration_cast<std::chrono::milliseconds>(ora - ultimomovimento).count() >= delay) {
         float dist = sqrt(pow(x - pX, 2) + pow(y - pY, 2));
