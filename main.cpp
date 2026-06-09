@@ -227,7 +227,19 @@ int main() {
         }
 
         for (int i = 0; i < MAX_PROIETTILI; i++) {
-            if (proiettili[i].attivo) mvwaddch(win, proiettili[i].y, proiettili[i].x, '.' | COLOR_PAIR(MY_YELLOW));
+            for (int i = 0; i < MAX_PROIETTILI; i++) {
+                if (proiettili[i].attivo) {
+                    // 1. Imposta il colore per la finestra (es. MY_RED o MY_GRAY)
+                    wcolor_set(win, MY_RED_TESTO, NULL);
+
+                    // 2. Stampa il carattere pulito senza operatori di mezzo
+                    mvwaddch(win, proiettili[i].y, proiettili[i].x, '.');
+
+                    // 3. Ripristina subito il colore neutro di default (0)
+                    wcolor_set(win, 0, NULL);
+                }
+            }
+            //if (proiettili[i].attivo) mvwaddch(win, proiettili[i].y, proiettili[i].x, '.' | COLOR_PAIR(MY_RED_TESTO));
         }
 
         if (!power_immunita && !invulnerabileRespawn) {
