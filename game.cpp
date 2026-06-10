@@ -1,10 +1,10 @@
+#include "game.hpp"
 #include <iostream>
 #include <curses.h>
 #include <cstdlib>
 #include <cmath>
 #include <chrono>
 
-#include "costanti.hpp"
 #include "gamestatus.hpp"
 #include "tempo.hpp"
 #include "bomba.hpp"
@@ -16,68 +16,50 @@
 
 using namespace std;
 
-// Struttura espansa: ora salva sia i nemici che i premi di ogni livello!
 struct StatoLivello {
     bool visitato = false;
     bool completato = false;
-
     enemy* normali[5] = {NULL};
     chaser* chasers[1] = {NULL};
     shooter* shooters[1] = {NULL};
-
-    int n_normali = 0;
-    int n_chasers = 0;
-    int n_shooters = 0;
-
-    // Array dei premi per QUESTO specifico livello
+    int n_normali = 0; int n_chasers = 0; int n_shooters = 0;
     Premio* premi[800] = {NULL};
     int num_premi = 0;
 };
 
-// Genera nemici e premi SOLO la prima volta che entri nel livello
 void setup_livello(int livello_num, StatoLivello& stato, char mappa[righe][colonne]) {
-    if (stato.visitato) return; // Se ci siamo già stati, non generare niente di nuovo!
+    if (stato.visitato) return;
     stato.visitato = true;
-
     if (livello_num == 1) { stato.n_normali = 3; stato.n_chasers = 0; stato.n_shooters = 0; }
     else if (livello_num == 2) { stato.n_normali = 5; stato.n_chasers = 0; stato.n_shooters = 0; }
     else if (livello_num == 3) { stato.n_normali = 2; stato.n_chasers = 1; stato.n_shooters = 0; }
     else if (livello_num == 4) { stato.n_normali = 3; stato.n_chasers = 1; stato.n_shooters = 0; }
     else if (livello_num == 5) { stato.n_normali = 2; stato.n_chasers = 1; stato.n_shooters = 1; }
     else { stato.n_normali = 1; stato.n_chasers = 0; stato.n_shooters = 0; }
-
     for (int i = 0; i < stato.n_normali; i++) {
-        int ex, ey;
-        do { ex = rand() % (colonne - 2) + 1; ey = rand() % (righe - 2) + 1; } while ((ex < 5 && ey < 5) || mappa[ey][ex] != vuoto);
+        int ex, ey; do { ex = rand() % (colonne - 2) + 1; ey = rand() % (righe - 2) + 1; } while ((ex < 5 && ey < 5) || mappa[ey][ex] != vuoto);
         stato.normali[i] = new enemy(ex, ey);
     }
     for (int i = 0; i < stato.n_chasers; i++) {
-        int cx, cy;
-        do { cx = rand() % (colonne - 2) + 1; cy = rand() % (righe - 2) + 1; } while ((cx < 5 && cy < 5) || mappa[cy][cx] != vuoto);
+        int cx, cy; do { cx = rand() % (colonne - 2) + 1; cy = rand() % (righe - 2) + 1; } while ((cx < 5 && cy < 5) || mappa[cy][cx] != vuoto);
         stato.chasers[i] = new chaser(cx, cy);
     }
     for (int i = 0; i < stato.n_shooters; i++) {
-        int sx, sy;
-        do { sx = rand() % (colonne - 2) + 1; sy = rand() % (righe - 2) + 1; } while ((sx < 5 && sy < 5) || mappa[sy][sx] != vuoto);
+        int sx, sy; do { sx = rand() % (colonne - 2) + 1; sy = rand() % (righe - 2) + 1; } while ((sx < 5 && sy < 5) || mappa[sy][sx] != vuoto);
         stato.shooters[i] = new shooter(sx, sy);
     }
-
-    // Genera i premi una volta sola nascondendoli sotto i muri attuali
     stato.num_premi = 0;
     for (int i = 0; i < righe; i++) {
         for (int j = 0; j < colonne; j++) {
-            if (mappa[i][j] == muro_distruttibile) {
-                if (rand() % 100 < 30) {
-                    stato.premi[stato.num_premi] = new Premio(j, i, rand() % 4);
-                    stato.num_premi++;
-                }
+            if (mappa[i][j] == muro_distruttibile && rand() % 100 < 30) {
+                stato.premi[stato.num_premi++] = new Premio(j, i, rand() % 4);
             }
         }
     }
 }
 
-int main() {
-    initscr();
+int game() {
+   initscr();
     cbreak();
     noecho();
     curs_set(0);
@@ -394,6 +376,9 @@ int main() {
     }
 
     if (statusPartita && lv->timerLivello) statusPartita->convertiTempoInPunti(lv->timerLivello->getTempo());
+    //punteggio:roba nuova
+    int punteggioFinale = statusPartita->getPunti();
+
     for (int i = 0; i < MAX_BOMBE; i++) if (arrayBombe[i]) delete arrayBombe[i];
 
     // Libero la memoria dei nemici e dei PREMI allocati dinamicamente
@@ -409,5 +394,5 @@ int main() {
     delete statusPartita;
 
     endwin();
-    return 0;
+    return punteggioFinale;
 }
