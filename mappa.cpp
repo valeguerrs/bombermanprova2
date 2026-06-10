@@ -71,10 +71,6 @@ void livello::disegna(WINDOW* win) {
             }
         }
     }
-
-    if (portaleX != -1 && portaleY != -1 && griglia[portaleY][portaleX] == vuoto) {
-        mvwprintw(win, portaleY, portaleX, "P");
-    }
 }
 
 gestore_livelli::gestore_livelli() { precedente = NULL; successivo = NULL; timerLivello = NULL; }
