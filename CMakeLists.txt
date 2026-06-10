@@ -14,9 +14,7 @@ set(SOURCES
         tempo.cpp
         bomba.cpp
         premio.cpp
-        personaggio.cpp
-        player.cpp
-        enemy.cpp
+        mappa.hpp
         mappa.cpp
         costanti.hpp
         costanti.hpp
@@ -26,8 +24,6 @@ set(SOURCES
         player.cpp
         enemy.hpp
         enemy.cpp
-        mappa.hpp
-        mappa.cpp
 )
 
 set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")

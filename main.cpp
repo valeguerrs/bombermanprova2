@@ -99,6 +99,7 @@ int main() {
     init_pair(MY_BLUE, 6, 6);
     init_pair(MY_RED_TESTO, 1, 0);
 
+
     unsigned int seme = std::chrono::duration_cast<std::chrono::seconds>(
                             std::chrono::system_clock::now().time_since_epoch()
                         ).count();
