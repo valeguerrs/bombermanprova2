@@ -66,13 +66,6 @@ int game() {
     timeout(50);
     keypad(stdscr, TRUE);
 
-    if (!has_colors()) {
-        printw("No colors\n");
-        getch();
-        endwin();
-        return 0;
-    }
-
     start_color();
     init_pair(MY_RED, 1, 1);
     init_pair(MY_YELLOW, 3, 3);

@@ -26,6 +26,12 @@ set(SOURCES
         enemy.cpp
         game.cpp
         game.hpp
+        classifica.cpp
+        classifica.hpp
+        menu.cpp
+        menu.hpp
+        tastiera.cpp
+        tastiera.hpp
 )
 
 set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
